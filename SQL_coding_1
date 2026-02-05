@@ -1,0 +1,503 @@
+MySQL coding
+
+
+LAB 3-6 
+
+                               -- LAB 3 -- 
+
+CREATE
+
+1) create database lib3;
+
+2) show databases;
+
+3) drop database lib3;
+
+4) use lib3;
+
+5) CREATE TABLE clienti ( 
+   cnp CHAR(13) NOT NULL PRIMARY KEY,
+   nume varchar(20) not null,
+   tel varchar(20),
+   data_inreg date );
+
+
+  CREATE TABLE comenzi(
+  id_comanda int not null auto_increment primary key,
+  cnp char(13) not null,
+  valoare double default 0.0,
+  foreign key(cnp)
+     references clienti (cnp)
+  on update cascade on delete cascade );
+
+  CREATE TABLE carti (
+  id_carte char(13) not null primary key,
+  titlu varchar(20),
+  autor varchar (20),
+  pret double 
+);
+
+  
+   CREATE TABLE carti_comandate(
+   id_comanda int not null,
+   id_carte char(13) not null, 
+   cantitate int,
+   primary key(id_comanda, id_carte),
+   foreign key(id_comanda)
+      references comenzi(id_comanda) 
+on update cascade on delete cascade,
+   foreign key(id_carte)
+   references carti(id_carte)
+on update cascade on delete cascade );
+
+
+6) insert into clienti(cnp,nume,tel,data_inreg) values ('1234','Ana','0771542350','2025-10-10'),
+('1235','Maria','0771500756','2026-01-01');
+
+insert into carti(id_carte,titlu,autor,pret) values
+('10','White nights','Dostoyevski',20),
+('11','Vinland','Kamoto',70);
+
+insert into comenzi(id_comanda,cnp,valoare) values (2,'1235',90);
+
+insert into carti_comandate(id_comanda,id_carte,cantitate) values
+('1','10',1),
+('2','11',1),
+('2','10',1);
+
+7) create table carti1 like carti;
+
+8) insert into carti1 select* from carti;
+
+
+
+                                 -- LAB 4 --
+
+
+
+
+1) CREATE TABLE comenzi1 (
+id_comanda int not null auto_increment primary key,
+valoare double default 0.0,
+costuri double default 0.0,
+profit double GENERATED ALWAYS AS (valoare-costuri) 
+);
+
+2) insert into comenzi1(id_comanda, valoare, costuri) values
+(1,20,5),
+(2,70,10),
+(3,10,1.5);
+
+
+CHECK CONSTRAINT 
+
+1) CREATE TABLE carti4 (
+  id_carte char(13) NOT NULL PRIMARY KEY,
+  titlu VARCHAR(20) NOT NULL, 
+  autor VARCHAR(20) NOT NULL,
+  pret double not null,
+  data_inregistrarii Date,
+  constraint pret_poz check(pret>0)
+) ;
+
+
+insert into carti4(id_carte,titlu,autor,pret) values ('1234','abc','def',-1);
+insert into carti4(id_carte,titlu,autor,pret) values ('1234','abc','def',10);
+
+// trebuie constraint [nume] check (expresie) la crearea tabelului ->
+
+2)
+
+select length('daria')=5;
+select length('ana')=5;
+
+3) select 'ana' like '___';
+   select 'maria' like '___';
+
+4) select 'ana' like 'A%';
+   select 'maria' like 'A%';
+
+5) select ascii(mid('ana',1,1))=ascii('A');
+   select ascii(mid('Ana',1,1))=ascii('A');
+
+6) select ascii(mid('Ana',1,1))=ascii('A') and 'Ana' like '___';
+   select ascii(mid('Anaf',1,1))=ascii('A') and 'Anaf' like '___';
+
+7) select 'matematica' like '%mate%';
+   select 'matmateca' like '%mate%';
+   select 'aritmetica' like '%mate%';
+
+8) select year('1989-10-10')<1990;
+   select year('1995-10-10')<1990;
+   select year(curdate())<1990;
+
+9) select month(curdate())=10;
+   select month('1990-10-10')=10;
+
+10) select month('1930-10-10')=10 and year('1930-10-10')<1930;
+     select month('1929-10-10')=10 and year('1929-10-10')<1930;
+
+11) select ascii(mid('daria',2,1))=ascii('a');
+    select ascii(mid('ana',2,1))=ascii('a');
+
+12) select 'daria' like '_a%';
+    select 'ana' like '_a%';
+
+13) select 'ana' like 'a%' or 'ana' like 'b%'; 
+    select 'daria' like 'a%' or 'daria' like 'b%';
+    select 'bogdan' like 'a%' or 'bogdan' like 'b%';
+
+14) select 'anb' like 'a%%b';
+    select 'ana' like 'a%%b';
+
+15) select 'bogdana' like '%a%' and 'bogdana' like '%b%';
+    select 'daria' like '%a%' and 'daria' like '%b%';
+
+16) select 'bogdana' like '%a%' and 'bogdana' like '%b%' or 'bogdana' like '%a%' or 'bogdana' like '%b%' ;
+
+ select 'daria' like '%a%' and 'daria' like '%b%' or 'daria' like '%a%' or 'daria' like '%b%' ;
+
+select 'def' like '%a%' and 'def' like '%b%' or 'def' like '%a%' or 'def' like '%b%' ;
+
+17) select '1234' like '1%' or '1234' like '2%' or '1234' like '5%';
+    select '6234' like '1%' or '6234' like '2%' or '6234' like '5%'; 
+
+18) select 'daria' not like 'a%';
+    select 'ana' not like 'a%';
+
+19) select 'daria' not like 'a%' and 'daria' not like 'b%';
+  
+
+
+                              -- LAB 5 --
+
+1) CREATE TABLE clienti1 (
+  cnp char(13) NOT NULL PRIMARY KEY,
+  nume VARCHAR(20) NOT NULL, 
+  an_nastere int NOT NULL,
+  data_inreg DATE
+) ;
+
+
+DELIMITER // 
+CREATE TRIGGER t1 BEFORE INSERT on clienti1 
+FOR EACH ROW
+BEGIN
+
+  set NEW.data_inreg=curdate() ;
+
+END; 
+// DELIMITER;
+
+insert into clienti1(cnp,nume,an_nastere,data_inreg) values ('1234','daria',2004,'2025-10-10');
+
+1') drop trigger t1;
+   DELIMITER //
+   CREATE TRIGGER t1 BEFORE INSERT ON clienti1
+   FOR EACH ROW 
+   BEGIN 
+  
+if(new.data_inreg>curdate()) then
+   SIGNAL SQLSTATE'45000'
+   SET MESSAGE_TEXT='data anterioara datei curente';
+end if;
+
+if(new.data_inreg is null) then
+   set new.data_inreg=curdate();
+end if;
+
+end;
+// DELIMITER;
+
+insert into clienti1(cnp,nume,an_nastere,data_inreg) values ('1235','maria',2005,'2024-10-10');
+insert into clienti1(cnp,nume,an_nastere)
+ values ('1237','andreea',2007);
+
+insert into clienti1(cnp,nume,an_nastere,data_inreg) values 
+('1236','ana',2000,'2027-10-10');
+
+
+2) drop trigger t1;
+
+ DELIMITER //
+   CREATE TRIGGER t2 BEFORE INSERT ON clienti1
+   FOR EACH ROW 
+   BEGIN 
+  
+if(new.nume not like '____') then
+signal sqlstate'45000'
+set message_text='doar 4 caract!';
+end if;
+
+
+end;
+// DELIMITER;
+;
+
+insert into clienti1(cnp,nume,an_nastere) values ('2222','abc',2000);
+ insert into clienti1(cnp,nume,an_nastere) values ('2222','abcd',2000);
+
+3)  
+   drop trigger t2;
+
+   DELIMITER //
+   CREATE TRIGGER t2 BEFORE INSERT ON clienti1
+   FOR EACH ROW 
+   BEGIN 
+  
+if(new.nume not like 'a%') then
+signal sqlstate'45000'
+set message_text='nu incepe cu a';
+end if;
+
+
+end;
+// DELIMITER ;
+
+
+insert into clienti1(cnp,nume,an_nastere) values ('2622','fbc',2000);
+
+4)   drop trigger t2;
+   DELIMITER //
+   CREATE TRIGGER t2 BEFORE INSERT ON clienti1
+   FOR EACH ROW 
+   BEGIN 
+  
+if(ascii(mid(new.nume,1,1))!=ascii('A')) then
+signal sqlstate'45000'
+set message_text='nu incepe cu A';
+end if;
+
+end;
+// DELIMITER ;
+
+
+5)  drop trigger t2;
+   DELIMITER //
+   CREATE TRIGGER t2 BEFORE INSERT ON clienti1
+   FOR EACH ROW 
+   BEGIN 
+
+  
+declare k int;
+declare c int;
+
+set k=0;
+
+iteratie:loop
+set k=k+1;
+  if(k>length(new.nume)) then
+     leave iteratie;
+end if;
+
+set c=ascii(mid(new.nume,k,1));
+if (k>4)  or (c<60 or c>122 or (c>90 and c<97)) then 
+ signal sqlstate'45000'
+ set message_text='nu are 4 caractere litere!';
+end if;
+
+end loop;
+
+end;
+// 
+DELIMITER ;
+
+6)  drop trigger t2;
+   DELIMITER //
+   CREATE TRIGGER t2 BEFORE INSERT ON clienti1
+   FOR EACH ROW 
+   BEGIN 
+
+  
+declare k int;
+declare c int;
+
+set k=0;
+if(new.nume not like '____') then
+signal sqlstate'45000'
+ set message_text='nu are 4 caractere cifre!';
+end if;
+
+iteratie:loop
+set k=k+1;
+  if(k>length(new.nume)) then
+     leave iteratie;
+end if;
+
+set c=ascii(mid(new.nume,k,1));
+if (c<48 or c>57) then 
+ signal sqlstate'45000'
+ set message_text='nu are 4 caractere cifre!';
+end if;
+
+end loop;
+
+end;
+// 
+DELIMITER ;
+
+
+7)  drop trigger t2;
+     DELIMITER //
+    CREATE TRIGGER t7 BEFORE INSERT on clienti1
+    FOR EACH ROW
+    BEGIN
+
+if(new.cnp not like '____' or new.cnp rlike '[^0-9]' ) then
+ signal sqlstate'45000'
+ set message_text='cnp din 4 cifre, suma primelor 2 e egala cu al treilea!';
+end if;
+
+if(substring(new.cnp,1,1)+substring(new.cnp,2,1)!=substring(new.cnp,3,1)) then
+signal sqlstate'45000'
+ set message_text='cnp din 4 cifre, suma primelor 2 e egala cu al treilea!';
+end if;
+
+end;
+// 
+DELIMITER ;
+
+insert into clienti1(cnp,nume,an_nastere) values ('1239','dfjc',2000);
+insert into clienti1(cnp,nume,an_nastere) values ('12395','dfjc',2000);
+
+
+8) DELIMITER //
+   CREATE TRIGGER t BEFORE INSERT ON carti
+   FOR EACH ROW
+   BEGIN
+   
+   if(new.pret<=10.5) then
+   signal sqlstate'45000'
+   set message_text='pret > 10.5!';
+end if;
+
+end;
+//
+DELIMITER ;
+
+insert into carti(id_carte,titlu,autor,pret) values ('5555','sdf','tre',10), ('6666','hyt','yui',40);
+
+
+9)  DELIMITER //
+
+CREATE TRIGGER t BEFORE INSERT ON clienti1
+FOR EACH ROW
+BEGIN 
+
+declare k int default 0;
+declare c int;
+
+if(new.nume not like '_____') then
+signal sqlstate'45000'
+set message_text='nume din 5 litere mari!';
+end if;
+
+iteratie:loop
+set k=k+1;
+
+if(k>length(new.nume)) then
+leave iteratie;
+end if;
+
+set c=ascii(mid(new.nume,k,1));
+if(c<65 or c>90) then 
+signal sqlstate '45000'
+set message_text='nume din 5 litere mari!';
+
+end if;
+end loop;
+
+end;
+//
+DELIMITER ;
+
+
+10) 
+
+11)
+
+
+
+                                 -- LAB 6 --
+
+1) select 'ana' rlike '^[a-z]{1,}$';
+   select'an1' rlike '^[a-z]{1,}$';
+
+2) select '1234' rlike '^[0-9]{1,}$';
+   select '12a3' rlike '^[0-9]{1,}$';
+
+3) select '6040915340447' rlike '^[0-9]{13}$';
+   select '604091534044' rlike '^[0-9]{13}$';
+
+4) select 'ana' rlike '^a[a-z]{0,}$';
+   select 'lana' rlike '^a[a-z]{0,}$';
+ 
+5) select regexp_like('Ana','^A[a-zA-Z]{1,}$','c');
+    select regexp_like('LAna','^A[a-zA-Z]{1,}$','c');
+
+6) select '6040915340447' rlike '^(1|2|5|6)[0-9]{12}$';
+    select '3040915340447' rlike '^(1|2|5|6)[0-9]{12}$';
+
+7) select 'iliescu' rlike 'escu$';
+
+8) select 'laurentiu' rlike '(en)';
+    select 'enescu' rlike '(en)';
+   select 'nescu' rlike '(en)';
+
+9) select 'ana' rlike '^(a|c)[a-z]{1,}$';
+   select 'cana' rlike '^(a|c)[a-z]{1,}$';
+   select 'lana' rlike '^(a|c)[a-z]{1,}$';
+
+9') select regexp_like('Ana','^(A|C)[a-zA-Z]{1,}$','c');
+    select regexp_like('ana','^(A|C)[a-zA-Z]{1,}$','c');
+
+
+10) select 'ana' rlike '^[a-j]';
+    select 'lana' rlike '^[a-j]';
+
+11) select regexp_like('Ana','^[A-J]','c');
+      select regexp_like('ana','^[A-J]','c');
+
+12) select 'daria' rlike '^[a-z]{5,9}$';
+     select 'dar' rlike '^[a-z]{5,9}$';
+
+13) select 'andreea' rlike '^[a-z]{6,}$';
+    select 'daria' rlike '^[a-z]{6,}$';
+
+14) select '0771542350' rlike '^[0-9]{10}$';
+     select '077154235a' rlike '^[0-9]{10}$';
+
+15) select 'daria@gmail.com' rlike '\\@';
+    select 'dariagmail.com' rlike '\\@';
+
+16) select 'dar_ia@gmail.com' rlike '^[^@]{1,}\\@[^@]{1,}\\.com$';
+
+
+17) select 'daria@gmail.com' rlike '^[a-z]{1,}\\@[a-z]{1,}\\.com$';
+    select 'daria@gmail.com.com' rlike '^[a-z]{1,}\\@[a-z]{1,}\\.com$';
+
+18) select'daria04@gmail.com' rlike '^[a-z0-9]{1,}\\@[a-z0-9]{1,}\\.com$'
+     select'dar_ia04@gmail.com' rlike '^[a-z0-9]{1,}\\@[a-z0-9]{1,}\\.com$';
+
+19) select 'daria_04@gmail.com' rlike'^[a-z0-9\\_]{1,}\\@[a-z0-9\\_]{1,}\\.com$';
+     select 'dar.ia_04@gmail.com' rlike'^[a-z0-9\\_]{1,}\\@[a-z0-9\\_]{1,}\\.com$';
+
+20) select 'Iliescu Daria-Gabriela' rlike '^[a-z]+([\\- ][a-z]+)?$';   ???
+
+21) select regexp_like('Turnu Magurele','^[A-Z][a-z]+([\\- ][a-z]+)?$','c');
+
+22) select 'ana' rlike '[^0-9]';
+
+23) select 'iliescu' rlike '(escu|eanu)$'
+
+24) select '@gmail.com' rlike '\\.(com|org|ro)$';
+
+25) select 'daria@gmail.com' rlike'^[^ ]{1,}\\@[^ ]{1,}$';
+
+
+
+
+
+
+
+
