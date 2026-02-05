@@ -1,0 +1,443 @@
+SQL coding 2
+
+-- LAB 7 - CLAUZA WHERE -- 
+
+1)
+ select id_carte, titlu, pret from carti
+WHERE pret>1.0;
+
+
+2) select id_carte, titlu, pret from carti WHERE pret BETWEEN 1.0 AND 3.0;
+
+
+3) select nume,oras,data_inreg from clienti WHERE data_inreg='2019-11-25';
+
+
+4) select * from clienti where year(data_inreg)=2016;
+
+5) select * from carti where titlu like 'L%';
+
+6) select * from carti where titlu in ('MATEMATICA','INFORMATICA');
+
+7) select* from clienti where tel is null;
+
+8) select * from clienti where nume like '%na%';
+
+9) select * from carti where titlu like '%mate%';
+
+10) select * from carti where titlu like '%a';
+
+11) select * from carti where id_carte not in ('1234','1235');
+
+12) select * from clienti where data_inreg BETWEEN '2014-1-1' and '2015-12-20';
+
+13) select * from clienti where nume like 'd%' and year(data_inreg)=2015;
+
+14) select* from carti where autor='Ionescu';
+
+15) select year(data_inreg) from clienti;
+
+
+-- LAB 8 - JOIN -- 
+
+INNER JOIN 
+
+1) select clienti.nume, comenzi.* from clienti 
+INNER JOIN comenzi ON clienti.cnp=comenzi.cnp;
+
+2) select carti.titlu, carti.pret, carti_comandate.id_comanda from carti
+ inner join carti_comandate on carti.id_carte=carti_comandate.id_carte
+where carti_comandate.id_comanda=2;
+
+3) select distinct carti.titlu, carti.pret from carti inner join carti_comandate
+on carti.id_carte= carti_comandate.id_carte;
+
+INNER JOIN PE MAI MULTE TABELE
+
+4) select carti.titlu, comenzi.cnp from carti inner join carti_comandate on carti.id_carte = carti_comandate.id_carte inner join comenzi on carti_comandate.id_comanda = comenzi.id_comanda where comenzi.cnp='1234';
+
+5) select clienti.nume, carti_comandate.id_carte from clienti inner join comenzi on clienti.cnp=comenzi.cnp inner join carti_comandate on comenzi.id_comanda=carti_comandate.id_comanda where carti_comandate.id_carte='1236';
+
+LEFT JOIN 
+
+6) select clienti.nume, comenzi.* from clienti left join comenzi on comenzi.cnp=clienti.cnp where comenzi.id_comanda is null;
+
+7) select carti.titlu, carti_comandate.id_comanda from carti left join carti_comandate on carti_comandate.id_carte=carti.id_carte where carti_comandate.id_comanda is null;
+
+
+NATURAL JOIN 
+
+8) select comenzi.*, clienti.nume from comenzi natural join clienti;
+9) select comenzi.id_comanda, carti.titlu, carti.id_carte from comenzi natural join carti_comandate natural join carti;
+
+
+CREATE..SELECT
+
+10) create table comz select c.id_carte, cl.nume from carti_comandate as c natural join comenzi as co natural join clienti as cl ;
+
+CREATE VIEW. 
+
+11) create view v1 as select co.id_comanda, co.cnp, co.valoare, co.data, upper(cl.nume) from comenzi as co natural join clienti as cl; 
+
+UNION, UNION ALL 
+
+13) select cl.nume, cl.cnp from clienti as cl left join comenzi as co on cl.cnp=co.cnp where co.id_comanda is null 
+UNION ALL 
+select cl.nume,cl.cnp from clienti as cl join comenzi as co on cl.cnp=co.cnp; 
+
+14) select cl.cnp from clienti as cl left join comenzi as co on cl.cnp=co.cnp where year(co.data)=2019 and co.id_comanda is null
+UNION
+select cl.cnp from clienti as cl left join comenzi as co on cl.cnp=co.cnp where co.id_comanda is null;
+
+SORTARI
+
+15) select * from comenzi where year(data) = 2026 order by(valoare) desc;
+
+16) select* from clienti order by data_inreg desc;
+
+ALIAS
+
+17) select co.*, c.titlu, c.pret from comenzi as co join carti_comandate as cc on cc.id_comanda=co.id_comanda join carti as c on c.id_carte=cc.id_carte where co.cnp='1234';
+
+FUNCTII DE COMASARE
+
+18) select sum(valoare) from comenzi where year(data)=2026;
+
+19) select count(cnp) from clienti;
+
+20) select min(pret) from carti;
+
+
+
+                      --LAB 9 --
+
+GROUP BY
+
+1) select cl.nume, count(co.id_comanda), sum(co.valoare) from clienti cl inner join comenzi co on co.cnp=cl.cnp group by cl.cnp;
+
+2) select cl.nume, sum(co.valoare) from clienti cl inner join comenzi co on cl.cnp=co.cnp group by cl.cnp having sum(valoare)>=8;
+
+3) select c.id_carte, c.titlu, sum(cc.cantitate) from carti c inner join carti_comandate cc on cc.id_carte=c.id_carte group by c.id_carte;
+
+4) select c.id_carte, c.titlu, count(cc.id_comanda) from carti c inner join carti_comandate cc on cc.id_carte=c.id_carte group by c.id_carte;
+
+5) select c.id_carte, sum(cc.cantitate) from carti c inner join carti_comandate cc on cc.id_carte=c.id_carte inner join comenzi co on co.id_comanda= cc.id_comanda where year(co.data)=2019 group by c.id_carte ;
+
+6) select co.*, count(cc.id_carte) from comenzi co 
+   inner join carti_comandate cc on cc.id_comanda=co.id_comanda group by co.id_comanda;
+
+7) select cl.*, sum(co.valoare) from clienti cl
+   inner join comenzi co on co.cnp=cl.cnp
+   group by cl.cnp order by sum(co.valoare) ;
+
+8) select cl.*, sum(co.valoare) from clienti cl 
+   inner join comenzi co on co.cnp=cl.cnp
+   where year(co.data)=2026
+   group by cl.cnp ;
+
+9) select cl.*, sum(co.valoare) from clienti cl 
+   inner join comenzi co on cl.cnp=co.cnp
+   where year(co.data)=2026
+   group by cl.cnp having sum(co.valoare)>5 order by sum(co.valoare)
+
+10) select year(co.data), count(cc.cantitate) from comenzi co 
+    inner join carti_comandate cc on cc.id_comanda=co.id_comanda
+    group by year(co.data);
+
+11) select year(co.data), avg(co.valoare) from comenzi co group by year(co.data);
+
+
+DISTINCT
+
+12) select count(distinct cc.id_carte), year(co.data) from carti_comandate cc inner join comenzi co on cc.id_comanda=co.id_comanda where year(co.data)=2026 group by year(co.data);
+
+13) select count(distinct cl.cnp), year(co.data) from comenzi co inner join clienti cl on cl.cnp=co.cnp where year(co.data)=2026 group by year(co.data) 
+
+14) select count(distinct co.cnp), cc.id_carte from carti_comandate cc inner join comenzi co on cc.id_comanda=co.id_comanda where cc.id_carte='1234';  
+
+13) select distinct cl.
+
+-- lab 10 FUNCTII PT MANIPULAREA DATELOR--
+
+1) select concat('ID CARTE: ', id_carte, ' ; titlu carte: ',titlu,' ; pret carte: ',pret) from carti;
+
+2) select truncate(pret,2) from carti;
+
+3) select round(pret,2) from carti;
+
+4) select date_add(data_inreg, interval 3 day) from clienti;
+
+5) select datediff(curdate(), data) from comenzi
+
+
+INTEROGARI UPDATE, DELETE, ALTER
+
+1) update carti set pret=pret+1;
+
+2) update carti set pret=pret+2 where id_carte='1234';
+
+3) update carti left join carti_comandate on carti.id_carte = carti_comandate.id_carte set pret=pret-1 where carti_comandate.id_comanda is null;
+
+4) alter table carti add column pret_nou double;
+
+5) update carti set pret_nou = pret;
+
+6) alter table carti modify titlu varchar(50);
+
+7) alter table carti change pret_nou pret_nou1 double;
+
+8) alter table comenzi drop foreign key  `comenzi_ibfk_1`;
+
+Fie tabelul test
+create table test(id int not null primary key, a1 int);
+
+9) alter table test add column id1 int not null;
+alter table test drop primary key;
+alter table test add primary key(id1);
+
+10) alter table carti drop pret_nou1;
+
+11) delete from comenzi where id_comanda='1';
+
+12) delete from clienti where cnp='1235';
+
+
+-- LAB 11 - PROCEDURI STOCATE -- 
+
+1)  delimiter // 
+create procedure insereaza( in id1 char(13), in titlu1 varchar(20), in autor1 varchar(20), in pret1 double)
+
+begin 
+insert into carti(id_carte, titlu, autor, pret) values (id1,titlu1,autor1,pret1);
+end
+//
+delimiter ;
+
+
+
+2) delimiter // 
+create procedure listeaza()
+ 
+begin 
+select * from carti;
+end
+//
+delimiter ;
+
+
+
+3) delimiter //
+create procedure updateaza(in valoare double)
+begin
+update carti set pret=pret+valoare;
+end
+//
+delimiter ;
+
+
+4) delimiter //
+create procedure descreste_pret(in procent double)
+
+begin 
+update carti set pret= pret-pret*procent;
+end
+//
+delimiter ;
+
+5) delimiter // 
+create procedure afiseaza(in idcarte char(13))
+
+begin
+select pret from carti where id_carte=idcarte;
+end
+//
+delimiter ;
+
+
+6) delimiter //
+create procedure permuta( in id1 char(13), in id2 char(13))
+begin
+declare pret1 double;
+declare pret2 double;
+
+select pret into pret1 from carti where id_carte=id1;
+select pret into pret2 from carti where id_carte=id2;
+
+update carti set pret=pret2 where id_carte=id2;
+update carti set pret=pret1 where id_carte=id1;
+
+end
+//
+delimiter ;
+
+7) delimiter //
+create procedure sterge(in idcarte char(13))
+
+begin 
+select count(*) into vanzari from carti_comandate where id_carte=idcarte;
+
+if vanzari=0 then
+delete from carti where id_carte=idcarte;
+end if;
+
+end
+//
+delimiter ;
+
+
+8) delimiter //
+create procedure catg(in cnp1 char(13), out rezultat varchar(20))
+begin
+
+declare total double default 0;
+select valoare into total from comenzi where comenzi.cnp=cnp1 ;
+
+if total>11 then 
+  set rezultat='categ1';
+elseif total between 8 and 11 then
+  set rezultat='categ2';
+else set rezultat='categ3';
+
+end if;
+ 
+end
+//
+delimiter ;
+
+9) delimiter //
+create procedure afis(in idcarte char(13), out rezultat varchar(10))
+begin
+
+declare k int;
+declare tit varchar(20);
+
+set rezultat='NU';
+set k=0;
+select titlu into tit from carti where id_carte=idcarte;
+
+iter:while(k<length(tit)) do
+
+set k=k+1;
+
+if(ascii(mid(tit,k,1))=ascii('D')) then
+set rezultat='DA';
+leave iter;
+end if;
+
+end while;
+
+end
+//
+delimiter ;
+
+
+10) delimiter //
+create procedure cmm(out id char(13))
+begin 
+
+declare k int default 1;
+declare val_max double default 0.0;
+declare val_curent double;
+
+declare nr_linii int;
+
+
+
+declare c cursor for select valoare from comenzi;
+select count(*) into nr_linii from l7.comenzi;
+
+
+open c; 
+while(k<=nr_linii) do
+  fetch c into val_curent;
+
+if val_curent>val_max then
+  set val_max=val_curent;
+end if;
+
+set k=k+1;
+
+end while;
+
+close c;
+
+select id_comanda into id from comenzi where valoare=val_max;
+
+end
+//
+delimiter ;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+11) delimiter //
+create procedure cmm2(out id char(13), out val double)
+begin
+
+declare k int default 1;
+declare nr_linii int;
+declare val_max double default 0.0;
+declare id_max char(13);
+declare val_curent double;
+declare id_curent char(13);
+
+declare c cursor for select id_comanda, valoare from comenzi;
+
+select count(*) into nr_linii from l7.comenzi;
+
+open c;
+iter:loop 
+
+if k>nr_linii then 
+leave iter;
+end if;
+
+fetch c into id_curent, val_curent;
+if val_curent>val_max then
+   set val_max=val_curent;
+   set id_max=id_curent;
+end if;
+
+set k=k+1;
+
+end loop;
+
+close c;
+
+set id=id_max;
+set val=val_max;
+
+end
+//
+delimiter ;
+
+
+
+select 'ana' rlike '^[^a]*a[^a]*a[^a]*$';
+ 
+
+
+
